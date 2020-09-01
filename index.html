@@ -38,6 +38,10 @@
             font-size: 24px;
             z-index: 800;
         }
+
+        .sketchpopup ul {
+            padding-left: 10px
+        }
     </style>
 </head>
 
@@ -62,6 +66,31 @@
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'
         }).addTo(map);
 
+        function addGeoJsonToMap(json){
+            function definePopup(feature, layer){
+                let contentTemplate = 
+                `
+                    <h4>${feature.properties.Name}</h4>
+                    <img style='width:100%' src='${feature.properties.RelPath}'/>
+                    <ul>
+                        <li>Latitude: ${feature.properties.Lat.toFixed(3)}</li>
+                        <li>Longitude: ${feature.properties.Lon.toFixed(3)}</li>
+                        <li>Altitude: ${parseFloat(feature.properties.Altitude).toFixed(1)} M</li>
+                        <li>Picture date: ${feature.properties.Timestamp}</li>
+                    </ul>
+                `
+                let newPopop = L.popup({
+                    minWidth: 300,
+                    className: 'sketchpopup'
+                })
+                .setContent(contentTemplate)
+                console.log('feature', feature)
+                layer.bindPopup(newPopop)
+            }
+
+            L.geoJSON(json, { onEachFeature: definePopup }).addTo(map);
+        }
+
 
         /* Display a point marker with pop-up text */
         //   L.marker([41.77, -72.69]).addTo(map) // EDIT latitude, longitude to re-position marker
@@ -70,7 +99,7 @@
             .then(result => result.json())
             .then(json => {
                 console.log('json', json)
-                L.geoJSON(json).addTo(map);
+                addGeoJsonToMap(json);
             })
             .catch(err => console.log('wtf', err))
     </script>
